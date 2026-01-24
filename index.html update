@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fun Slot Machine</title>
+<style>
+  body {
+    font-family: sans-serif;
+    text-align: center;
+    background: #111;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+  }
+
+  h1 { margin-top: 20px; }
+  
+  .slot-container {
+    display: inline-block;
+    margin: 20px auto;
+    padding: 20px;
+    border: 4px solid #ccc;
+    border-radius: 15px;
+    background: linear-gradient(to bottom, #222, #111);
+    box-shadow: 0 0 20px #fff5;
+  }
+
+  .reels {
+    display: grid;
+    grid-template-columns: repeat(7, 60px);
+    grid-template-rows: repeat(3, 60px);
+    gap: 5px;
+    margin-bottom: 20px;
+  }
+
+  .cell {
+    background: #333;
+    border: 2px solid #555;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    transition: all 0.3s ease;
+  }
+
+  .cell.win {
+    border-color: gold;
+    box-shadow: 0 0 15px gold;
+    transform: scale(1.2);
+  }
+
+  button {
+    padding: 10px 30px;
+    font-size: 20px;
+    border-radius: 10px;
+    border: none;
+    background: gold;
+    color: #111;
+    cursor: pointer;
+    box-shadow: 0 0 10px #fff5;
+    transition: all 0.2s ease;
+  }
+
+  button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px #fff8;
+  }
+
+  .scoreboard {
+    margin-top: 10px;
+    font-size: 18px;
+  }
+
+  .instructions, .disclaimer {
+    max-width: 600px;
+    margin: 10px auto;
+    font-size: 14px;
+    color: #ccc;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<h1>Fun Slot Machine</h1>
+
+<div class="slot-container">
+  <div class="reels" id="reels">
+    <!-- 7x3 grid cells inserted via JS -->
+  </div>
+
+  <button id="spinButton">SPIN</button>
+
+  <div class="scoreboard" id="scoreboard">Wins: 0 | Streak: 0</div>
+</div>
+
+<div class="instructions">
+  <strong>How to play:</strong> Click SPIN to spin the reels. Match 3 or more symbols along any of the 9 winning lines to win! ⭐ multiplies points, 7️⃣ is jackpot!
+</div>
+
+<div class="disclaimer">
+  This game is for entertainment purposes only. No real money can be won or lost.
+</div>
+
+<script>
+const symbols = ['🍒','🍋','🍊','🍇','🍉','⭐','7️⃣'];
+const columns = 7;
+const rows = 3;
+let wins = 0;
+let streak = 0;
+
+// 9 predefined win lines (row indices per column)
+const winLines = [
+  [0,0,0,0,0,0,0], // top row
+  [1,1,1,1,1,1,1], // middle row
+  [2,2,2,2,2,2,2], // bottom row
+  [0,1,2,1,0,1,2], // zigzag 1
+  [2,1,0,1,2,1,0], // zigzag 2
+  [0,0,1,1,2,2,2], // diagonal / multi
+  [2,2,1,1,0,0,0],
+  [1,0,1,2,1,0,1],
+  [1,2,1,0,1,2,1]
+];
+
+// Generate grid cells
+const reelsContainer = document.getElementById('reels');
+let grid = [];
+for(let r=0;r<rows;r++){
+  grid[r]=[];
+  for(let c=0;c<columns;c++){
+    const cell = document.createElement('div');
+    cell.className='cell';
+    reelsContainer.appendChild(cell);
+    grid[r][c]=cell;
+  }
+}
+
+// Spin logic
+document.getElementById('spinButton').addEventListener('click', spin);
+
+function spin(){
+  // Clear previous wins
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<columns;c++){
+      grid[r][c].classList.remove('win');
+    }
+  }
+
+  // Randomize symbols
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<columns;c++){
+      const sym = symbols[Math.floor(Math.random()*symbols.length)];
+      grid[r][c].textContent = sym;
+    }
+  }
+
+  // Check wins
+  let anyWin=false;
+  winLines.forEach(line=>{
+    const firstSym = grid[line[0]][0].textContent;
+    let lineWin=true;
+    for(let c=1;c<columns;c++){
+      if(grid[line[c]][c].textContent !== firstSym){
+        lineWin=false;
+        break;
+      }
+    }
+    if(lineWin){
+      anyWin=true;
+      for(let c=0;c<columns;c++){
+        grid[line[c]][c].classList.add('win');
+      }
+      // Update streak / wins
+      if(firstSym==='7️⃣'){ // jackpot
+        wins += 10;
+      } else if(firstSym==='⭐'){ // multiplier
+        wins += 5;
+      } else {
+        wins += 1;
+      }
+      streak++;
+    }
+  });
+
+  if(!anyWin) streak=0;
+  document.getElementById('scoreboard').textContent=`Wins: ${wins} | Streak: ${streak}`;
+
+  // Optional: placeholder sounds
+  // new Audio('spin.mp3').play();
+  // if(anyWin) new Audio('win.mp3').play();
+}
+</script>
+
+</body>
+</html>
