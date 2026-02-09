@@ -1,38 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$1 Slot</title>
+  <meta charset="UTF-8" />
+  <title>Comfort Slot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
     body {
+      margin: 0;
       font-family: system-ui, sans-serif;
-      background: #111;
-      color: #fff;
-      text-align: center;
-      padding-top: 40px;
+      background-color: #1e1e1e;
+      color: #f4f4f4;
     }
-    .slot {
-      font-size: 48px;
-      margin: 20px;
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
+
+    .mode-toggle {
+      margin-bottom: 1rem;
+    }
+
     button {
-      font-size: 18px;
-      padding: 10px 20px;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: none;
       cursor: pointer;
+      margin: 0 0.25rem;
+    }
+
+    .cozy {
+      background: linear-gradient(#2b2a26, #1f1e1b);
+    }
+
+    .neon {
+      background: linear-gradient(#0f1020, #090914);
+    }
+
+    .slot-frame {
+      width: 300px;
+      height: 400px;
+      border-radius: 16px;
+      background-color: rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   </style>
 </head>
+
 <body>
+  <div class="app cozy" id="app">
 
-  <h1>$1 Slot</h1>
-  <p>Credits: <span id="credits">10</span></p>
+    <div class="mode-toggle">
+      <button onclick="setMode('cozy')">Home Cozy</button>
+      <button onclick="setMode('neon')">Neon Arcade</button>
+    </div>
 
-  <div class="slot" id="reels">🍒 🍋 ⭐</div>
+    <div class="slot-frame">
+      <p>🎰 Slot Machine Placeholder</p>
+    </div>
 
-  <button onclick="spin()">Spin ($1)</button>
+  </div>
 
-  <p id="result"></p>
-
-  <script src="slot.js"></script>
+  <script>
+    function setMode(mode) {
+      const app = document.getElementById('app');
+      app.className = 'app ' + mode;
+    }
+  </script>
 </body>
 </html>
