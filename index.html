@@ -115,33 +115,219 @@
   }
 
   const savedMode = localStorage.getItem("cozySlotsMode");
-  if (savedMode) {
-    document.getElementById("app").className = "app " + savedMode;
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cozy Slots</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  let credits = 10;
-  const symbols = ["🍒", "🍋", "⭐", "🔔", "💎"];
-
-  function spin() {
-    if (credits <= 0) {
-      document.getElementById("result").textContent = "Out of credits.";
-      return;
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background-color: #1e1e1e;
+      color: #f4f4f4;
     }
 
-    credits--;
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
 
-    const r1 = document.getElementById("reel1");
-    const r2 = document.getElementById("reel2");
-    const r3 = document.getElementById("reel3");
+    .mode-toggle {
+      margin-bottom: 1rem;
+    }
 
-    // Start animation
-    r1.classList.add("spin-anim");
-    r2.classList.add("spin-anim");
-    r3.classList.add("spin-anim");
+    button {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      margin: 0.25rem;
+    }
 
-    // Stop + reveal after delay
-    setTimeout(() => {
-      const reel1 = symbols[random()];
+    .cozy {
+      background: linear-gradient(#2b2a26, #1f1e1b);
+    }
+
+    .neon {
+      background: linear-gradient(#0f1020, #090914);
+    }
+
+    .slot-frame {
+      width: 300px;
+      border-radius: 16px;
+      background-color: rgba(255,255,255,0.05);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .reels {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .reel {
+      width: 70px;
+      height: 70px;
+      font-size: 2rem;
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Animation */
+    .spin-anim {
+      animation: spin 0.3s linear infinite;
+    }
+
+    @keyframes spin {
+      from { opacity: 0.3; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    #result {
+      margin-top: 10px;
+      min-height: 24px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app cozy" id="app">
+
+    <div class="mode-toggle">
+      <button onclick="setMode('cozy')">Home Cozy</button>
+      <button onclick="setMode('neon')">Neon Arcade</button>
+    </div>
+
+    <div class="slot-frame">
+
+      <div id="reels" class="reels">
+        <div class="reel" id="reel1">🍒</div>
+        <div class="reel" id="reel2">🍒</div>
+        <div class="reel" id="reel3">🍒</div>
+      </div>
+
+      <div>Credits: <span id="credits">10</span></div>
+      <button onclick="spin()">Spin</button>
+      <div id="result"></div>
+
+    </div>
+
+  </div>
+
+<script>
+function setMode(mode) {
+  const app = document.getElementById("app");
+  app.className = "app " + mode;
+  localStorage.setItem("cozySlotsMode", mode);
+}
+
+const savedMode = localStorage.getItem("cozySlotsMode");
+if (savedMode) {
+  document.getElementById("app").className = "app " + savedMode;
+}
+
+let credits = 10;
+document.getElementById("credits").textContent = credits;
+
+const symbols = ["🍒", "🍋", "⭐", "🔔", "💎"];
+
+const paylines = [
+  [0,1,2], // straight
+  [0,0,0], // top
+  [2,2,2], // bottom
+  [0,1,2], // diagonal TL→BR
+  [2,1,0], // diagonal BL→TR
+  [1,0,1], // V shape
+  [1,2,1], // inverted V
+  [0,1,1], // step down
+  [2,1,1]  // step up
+];
+
+const payouts = {
+  "🍒": 3,
+  "🍋": 4,
+  "⭐": 5,
+  "🔔": 8,
+  "💎": 12
+};
+
+function spin() {
+  if (credits <= 0) {
+    document.getElementById("result").textContent = "Out of credits.";
+    return;
+  }
+
+  credits--;
+  document.getElementById("credits").textContent = credits;
+
+  const r1 = document.getElementById("reel1");
+  const r2 = document.getElementById("reel2");
+  const r3 = document.getElementById("reel3");
+
+  r1.classList.add("spin-anim");
+  r2.classList.add("spin-anim");
+  r3.classList.add("spin-anim");
+
+  setTimeout(() => {
+    const grid = [
+      [rand(), rand(), rand()], // row 1
+      [rand(), rand(), rand()], // row 2
+      [rand(), rand(), rand()]  // row 3
+    ];
+
+    r1.textContent = grid[1][0];
+    r2.textContent = grid[1][1];
+    r3.textContent = grid[1][2];
+
+    r1.classList.remove("spin-anim");
+    r2.classList.remove("spin-anim");
+    r3.classList.remove("spin-anim");
+
+    let totalWin = 0;
+    let winLines = 0;
+
+    for (const line of paylines) {
+      const a = grid[line[0]][0];
+      const b = grid[line[1]][1];
+      const c = grid[line[2]][2];
+
+      if (a === b && b === c) {
+        totalWin += payouts[a];
+        winLines++;
+      }
+    }
+
+    if (totalWin > 0) {
+      credits += totalWin;
+      document.getElementById("credits").textContent = credits;
+      document.getElementById("result").textContent =
+        `WIN! ${winLines} line(s) — +${totalWin} credits`;
+    } else {
+      document.getElementById("result").textContent = "No win.";
+    }
+
+  }, 600);
+}
+
+function rand() {
+  return symbols[Math.floor(Math.random() * symbols.length)];
+}
+</script>
+
+</body>
+</html>ymbols[random()];
       const reel2 = symbols[random()];
       const reel3 = symbols[random()];
 
